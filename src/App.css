@@ -11,10 +11,11 @@
   overflow: auto;
   width: 100vw;
   height: 100vh;
+  overflow-x: hidden;
 }
 
 .TopBar {
-  width: 100%;
+  width: 100vw;
   height: 15vh;
   background-color: black;
   color: white;
@@ -22,20 +23,44 @@
   justify-content: center;
   align-items: center;
   top: 0;
-  position: fixed;
+  position: sticky;
   z-index: 1;
   font-family: 'Courier Prime', monospace;
   font-size: 5vh;
+  z-index: 1;
+}
+
+.SortBar {
+  width: 100vw;
+  height: 5vh;
+  background-color: rgb(170, 170, 170);
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 15vh;
+  position: sticky;
+  z-index: 1;
+}
+
+.SortBar p {
+  font-size: 2vh;
+}
+
+.SortBar .DropdownContainer {
+  margin-left: 10px;
 }
 
 .FontContainer {
-  margin: 20vh auto 5vh auto;
+  margin: 5vh auto 5vh auto;
   display: grid;
   justify-items: center;
   align-items: center;
   justify-content: space-around;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 15px;
+  position: relative;
+  z-index: 0;
 }
 
 .Product {
