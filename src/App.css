@@ -1,38 +1,100 @@
-.App {
-  text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.ScrollGrid {
+  margin: 0 auto;
+  overflow: auto;
+  width: 100vw;
+  height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.TopBar {
+  width: 100%;
+  height: 15vh;
+  background-color: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  position: fixed;
+  z-index: 1;
+  font-family: 'Courier Prime', monospace;
+  font-size: 5vh;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.FontContainer {
+  margin: 20vh auto 5vh auto;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  justify-content: space-around;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 15px;
+}
+
+.Product {
+  display: inline-block;
+  background-color: #e7e7e7;
+  border-radius: 10px;
+  padding: 20px;
+  align-self: center;
+}
+
+.Grow { 
+  transition: all .3s ease-in-out; 
+}
+
+.Grow:hover { 
+  transform: scale(1.08); 
+}
+.Product .Container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
 }
 
-.App-link {
-  color: #61dafb;
+.Product .Container p {
+  margin-top: 20px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.Ender {
+  width: 100%;
+  font-family: 'Courier Prime', monospace;
+  font-size: 3vh;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 5vh;
 }
+
+/* loading dots */
+
+.Loading:after {
+  content: ' .';
+  animation: dots 1s steps(5, end) infinite;}
+
+@keyframes dots {
+  0%, 20% {
+    color: rgba(0,0,0,0);
+    text-shadow:
+      .25em 0 0 rgba(0,0,0,0),
+      .5em 0 0 rgba(0,0,0,0);}
+  40% {
+    color: black;
+    text-shadow:
+      .25em 0 0 rgba(0,0,0,0),
+      .5em 0 0 rgba(0,0,0,0);}
+  60% {
+    text-shadow:
+      .25em 0 0 black,
+      .5em 0 0 rgba(0,0,0,0);}
+  80%, 100% {
+    text-shadow:
+      .25em 0 0 black,
+      .5em 0 0 black;}}
