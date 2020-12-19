@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useState } from 'react';
+import { createRef, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const fetchFonts = (sortBy, isAscending, pageNumber) => {
@@ -17,7 +17,7 @@ const fetchFonts = (sortBy, isAscending, pageNumber) => {
           case 'Size':
             return compare(a.size, b.size);
           default:
-            return compare(a.date, b.date);
+            return compare(a.id, b.id);
         }
       });
 
@@ -36,8 +36,10 @@ const App = () => {
   const [fontsDisplayed, setFontsDisplayed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [sortBy, setSortBy] = useState("Size");
+  const [sortBy, setSortBy] = useState("Price");
   const [order, setOrder] = useState("Descending");
+  const sortByRef = createRef();
+  const orderRef = createRef();
 
   const handleScroll = event => {
     const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
@@ -46,30 +48,34 @@ const App = () => {
     }
   }
 
-  const handleSortDropdown = event => {
-    setSortBy(event.target.value);
-  }
-
-  const handleOrderDropdown = event => {
-    setOrder(event.target.value);
+  const handleClick = () => {
+    setPage(1);
+    setInitial(true);
+    setNextBatch([]);
+    setFontsDisplayed([]);
+    setLoading(true);
+    setHasMore(true);
+    setSortBy(sortByRef.current.value);
+    setOrder(orderRef.current.value);
   }
 
   useEffect(() => {
     const loadInitial = async () => {
       setLoading(true)
-      const firstFonts = await fetchFonts('Date', false, page);
+      const firstFonts = await fetchFonts(sortBy, ((order === 'Ascending' ? true : false)), page);
       setNextBatch(prev => [...prev, ...firstFonts]);
       setPage(prev => prev + 1);
+      console.log("load");
     }
 
-    loadInitial();
-  }, [])
+    if(initial) loadInitial();
+  }, [initial])
 
   useEffect(() => {
     const loadFonts = async () => {
       if(!initial && hasMore) {
         setLoading(true);
-        const nextFonts = await fetchFonts('Date', false, page);
+        const nextFonts = await fetchFonts(sortBy, ((order === 'Ascending' ? true : false)), page);
         if(nextBatch === undefined || nextBatch.length === 0) {
           setHasMore(false);
         } else {
@@ -92,17 +98,17 @@ const App = () => {
       <div className='ScrollGrid' onScroll={handleScroll}>
         <div className='TopBar'>Text Face 2000</div>
         <div className='SortBar'>
-          <p>Sort By: </p>
           <div className='DropdownContainer'>
-            <select value={sortBy} onChange={handleSortDropdown}>
+            <select ref={sortByRef} defaultValue={sortBy}>
               <option value="Size">Size</option>
               <option value="Price">Price</option>
               <option value="Id">Id</option>
             </select>
-            <select value={order} onChange={handleOrderDropdown}>
+            <select ref={orderRef} defaultValue={order}>
               <option value="Ascending">Ascending</option>
               <option value="Descending">Descending</option>
             </select>
+            <button onClick={handleClick}>Sort</button>
           </div>
         </div>
         <div className='FontContainer'>

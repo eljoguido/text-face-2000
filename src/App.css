@@ -48,11 +48,13 @@
 }
 
 .SortBar .DropdownContainer {
-  margin-left: 10px;
+  display: flex;
+  justify-content: space-around;
+  width: 200px;
 }
 
 .FontContainer {
-  margin: 5vh auto 5vh auto;
+  margin: 5vh auto 7vh auto;
   display: grid;
   justify-items: center;
   align-items: center;
