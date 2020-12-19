@@ -69,8 +69,7 @@
   display: inline-block;
   background-color: #e7e7e7;
   border-radius: 10px;
-  padding: 20px;
-  align-self: center;
+  padding: 0px 40px;
 }
 
 .Grow { 
@@ -83,13 +82,37 @@
 .Product .Container {
   display: flex;
   flex-direction: column;
+  justify-content: space-around;
+  height: 175px;
+}
+
+.Product .Header {
+  display: flex;
+  font-size: 13px ;
+  margin: 0px -20px;
+}
+
+.Product .Content {
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.Product .Container p {
-  margin-top: 20px;
+.Product .Footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 0px -20px;
 }
+
+.Product .FontSize {
+  font-size: 13px;
+}
+
+.Product p {
+  font-family: 'Courier Prime', monospace;
+}
+
 
 .Ender {
   width: 100%;

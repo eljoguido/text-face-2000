@@ -1,6 +1,7 @@
 import './App.css';
 import { createRef, useEffect, useState } from 'react';
 import axios from 'axios';
+import moment from 'moment';
 
 const fetchFonts = (sortBy, isAscending, pageNumber) => {
   return new Promise(r => setTimeout(r, 800))
@@ -27,6 +28,22 @@ const fetchFonts = (sortBy, isAscending, pageNumber) => {
       }
       return batchFonts;
     });
+}
+
+const formatDate = date => {
+  const properDate = moment(date)
+  const relativeDate = properDate.fromNow();
+  const splitRelDate = relativeDate.split(' ');
+  const unit = splitRelDate[0]
+  const period = splitRelDate[1];
+  const correctionFilter = ['month', 'months', 'year', 'years'];
+  let formattedDate;
+  if(correctionFilter.includes(period) || (period === 'days' && parseInt(unit) > 6)) {
+    formattedDate = properDate.format('ll');
+  } else {
+    formattedDate = relativeDate;
+  }
+  return formattedDate.toString();
 }
 
 const App = () => {
@@ -113,12 +130,19 @@ const App = () => {
         </div>
         <div className='FontContainer'>
           {fontsDisplayed.map(font => {
+            const dateAdded = formatDate(font.date);
             return (
               <div key={font.id}>
                 <div className={productClassList}>
                   <div className='Container'>
-                    <div style={{fontSize: `${font.size}px`}}>{font.value}</div>
-                    <p><b>${font.price}</b></p>
+                    <div className='Header'><p className='DateAdded'>{dateAdded}</p></div>
+                    <div className='Content'>
+                      <div style={{fontSize: `${font.size}px`}}>{font.value}</div>
+                    </div>
+                    <div className='Footer'>
+                      <p className='FontSize'>{font.size}px</p>
+                      <p className='FontPrice'><b>${font.price}</b></p>
+                    </div>
                   </div>
                 </div>
               </div>

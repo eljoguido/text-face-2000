@@ -6,7 +6,7 @@ for https://www.json-generator.com/
     id: '{{objectId()}}',
     size: '{{integer(20, 45)}}',
     price: '{{floating(0.5, 10, 2)}}',
-    date: '{{date(new Date(2020, 0, 1), new Date(), "YYYY-MM-ddThh:mm:ss Z")}}',
+    date: '{{date(new Date(2020, 0, 1), new Date(), "YYYY-MM-ddThh:mm:ssZ")}}',
     value: function (tags) {
       var faces = [
         '( ͡° ͜ʖ ͡°)', 
