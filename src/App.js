@@ -2,6 +2,7 @@ import './App.css';
 import { createRef, useEffect, useState } from 'react';
 import axios from 'axios';
 import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 
 const fetchFonts = (sortBy, isAscending, pageNumber) => {
   return new Promise(r => setTimeout(r, 800))
@@ -24,10 +25,16 @@ const fetchFonts = (sortBy, isAscending, pageNumber) => {
 
       let batchFonts;
       for(let i = 0; i < pageNumber; i++) {
-        batchFonts = sortedFonts.splice(0, 20);
+        batchFonts = sortedFonts.splice(0, 19);
       }
       return batchFonts;
     });
+}
+
+const fetchAds = () => {
+  return new Promise (r => setTimeout(r, 500))
+    .then(() => axios.get('ads.json'))
+    .then(res => {return res.data});
 }
 
 const formatDate = date => {
@@ -50,11 +57,14 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [initial, setInitial] = useState(true);
   const [nextBatch, setNextBatch] = useState([]);
-  const [fontsDisplayed, setFontsDisplayed] = useState([]);
+  const [ads, setAds] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [lastAd, setLastAd] = useState(undefined);
+  const [itemsDisplayed, setItemsDisplayed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [sortBy, setSortBy] = useState("Price");
-  const [order, setOrder] = useState("Descending");
+  const [sortBy, setSortBy] = useState("Id");
+  const [order, setOrder] = useState("Ascending");
   const sortByRef = createRef();
   const orderRef = createRef();
 
@@ -69,20 +79,37 @@ const App = () => {
     setPage(1);
     setInitial(true);
     setNextBatch([]);
-    setFontsDisplayed([]);
+    setItemsDisplayed([]);
     setLoading(true);
     setHasMore(true);
     setSortBy(sortByRef.current.value);
     setOrder(orderRef.current.value);
   }
 
+  const addType = (type) => {
+    const modItem = item => {
+      let newItem = item;
+      newItem.type = type;
+      return newItem;
+    }
+    return modItem;
+  }
+
+  const getRandom = (fetchedAds) => {
+    return fetchedAds[Math.floor(Math.random() * fetchedAds.length)];
+  }
+
   useEffect(() => {
     const loadInitial = async () => {
       setLoading(true)
       const firstFonts = await fetchFonts(sortBy, ((order === 'Ascending' ? true : false)), page);
-      setNextBatch(prev => [...prev, ...firstFonts]);
+      const firstItems = [...firstFonts].map(addType('Font'));
+      if(ads === undefined || ads.length === 0) {
+        const fetchedAds = await fetchAds();
+        setAds(fetchedAds.map(addType('Ad')));
+      }
+      setNextBatch(prev => [...prev, ...firstItems]);
       setPage(prev => prev + 1);
-      console.log("load");
     }
 
     if(initial) loadInitial();
@@ -96,9 +123,45 @@ const App = () => {
         if(nextBatch === undefined || nextBatch.length === 0) {
           setHasMore(false);
         } else {
-          setFontsDisplayed(prev => [...prev, ...nextBatch]);
+          let prodsToShow = Math.floor((offset + nextBatch.length)/20);
+          let nextBatchCopy = [...nextBatch];
+          let newNextBatch = []
+          let adsToAdd = [];
+          let lastAdAdded = lastAd;
+          for(let j = 0; j < prodsToShow; j++) {
+            let ad = getRandom(ads);
+            if(lastAdAdded !== undefined) {
+              while(ad.id === lastAdAdded.id) {
+                ad = getRandom(ads);
+              }
+            }
+            adsToAdd.push(ad);
+            lastAdAdded = ad;
+          }
+          const newAdsToAdd = adsToAdd.map(ad => {
+            let newAd = Object.assign({}, ad);
+            newAd.id = uuidv4();
+            return newAd;
+          })
+          for(let i = 0; i < prodsToShow; i++) {
+            if(i === 0) {
+              newNextBatch = [...newNextBatch, ...nextBatchCopy.splice(0, (20 - offset))];
+            } else {
+              newNextBatch = [...newNextBatch, ...nextBatchCopy.splice(0, 20)];
+            }
+            if(newAdsToAdd.length > 0) {
+              newNextBatch.push(newAdsToAdd[i]);
+            }
+          }
+          newNextBatch = [...newNextBatch, ...nextBatchCopy];
+          setItemsDisplayed(prev => [...prev, ...newNextBatch]);
+          if(adsToAdd.length > 0) {
+            setLastAd(adsToAdd[adsToAdd.length - 1]);
+          }
+          setOffset((nextBatch.length + offset) % 20);
         }
-        setNextBatch(nextFonts);
+        const nextItems = [...nextFonts].map(addType('Font'));
+        setNextBatch(nextItems);
         setLoading(false);
       } else {
         setInitial(false);
@@ -129,27 +192,53 @@ const App = () => {
           </div>
         </div>
         <div className='FontContainer'>
-          {fontsDisplayed.map(font => {
-            const dateAdded = formatDate(font.date);
-            return (
-              <div key={font.id}>
-                <div className={productClassList}>
-                  <div className='Container'>
-                    <div className='Header'><p className='DateAdded'>{dateAdded}</p></div>
-                    <div className='Content'>
-                      <div style={{fontSize: `${font.size}px`}}>{font.value}</div>
-                    </div>
-                    <div className='Footer'>
-                      <p className='FontSize'>{font.size}px</p>
-                      <p className='FontPrice'><b>${font.price}</b></p>
+          {itemsDisplayed.map(item => {
+            let productItem;
+            if(item.type === 'Font') {
+              const dateAdded = formatDate(item.date);
+              productItem = (
+                <div key={item.id}>
+                  <div className={productClassList}>
+                    <div className='Container'>
+                      <div className='Header'><p className='DateAdded'>{dateAdded}</p></div>
+                      <div className='Content'>
+                        <div style={{fontSize: `${item.size}px`}}>{item.value}</div>
+                      </div>
+                      <div className='Footer'>
+                        <p className='FontSize'>{item.size}px</p>
+                        <p className='FontPrice'><b>${item.price}</b></p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
+              );
+            } else {
+              productItem = (
+                <div key={item.id}>
+                  <div className='Grow'>
+                    <div style={
+                      {
+                        fontSize: `${item.size}px`, 
+                        color: `${item.color}`,
+                        backgroundColor: `${item.backgroundColor}`,
+                        height: `175px`,
+                        borderRadius: `10px`,
+                        padding: `0px 40px`,
+                        display: `flex`,
+                        justifyContent: `center`,
+                        alignItems: `center`
+                      }
+                    }>
+                      <b>{item.value}</b>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+            return productItem;
           })}
         </div>
-        {loading && <div className={loadingClassList}>Loading</div>}
+        {loading && <div className={loadingClassList}>loading</div>}
         {!loading && !hasMore && <div className="Ender">~ end of catalogue ~</div>}
       </div>
   );

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "04cbac76-995d-4f22-8638-523a4ca34786",
+    "value": "GET RICH QUICK!!",
+    "size": 15,
+    "color": "black",
+    "backgroundColor": "orange"
+  },
+  {
+    "id": "e49ffe39-fee7-4cd1-82ac-943728922ae4",
+    "value": "Be the Next Big Thing!!",
+    "size": 17,
+    "color": "white",
+    "backgroundColor": "red"
+  },
+  {
+    "id": "8ef07613-83e8-4348-9b8a-b0ab2f991bd4",
+    "value": "Get free RAM!",
+    "size": 18,
+    "color": "white",
+    "backgroundColor": "purple"
+  }
+]
