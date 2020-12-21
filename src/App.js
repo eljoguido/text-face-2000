@@ -1,57 +1,8 @@
 import './App.css';
+import {fetchFonts, fetchAds} from './Api';
 import { createRef, useEffect, useState } from 'react';
-import axios from 'axios';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-
-const fetchFonts = (sortBy, isAscending, pageNumber) => {
-  return new Promise(r => setTimeout(r, 800))
-    .then(() => axios.get('fonts.json'))
-    .then(res => {
-      const sortedFonts = res.data.slice().sort((a, b) => {
-        const compare = (a, b) => {
-          return (isAscending ? ((a > b) ? 1 : -1) : ((a < b) ? 1 : -1));
-        }
-
-        switch(sortBy) {
-          case 'Price':
-            return compare(a.price, b.price);
-          case 'Size':
-            return compare(a.size, b.size);
-          default:
-            return compare(a.id, b.id);
-        }
-      });
-
-      let batchFonts;
-      for(let i = 0; i < pageNumber; i++) {
-        batchFonts = sortedFonts.splice(0, 19);
-      }
-      return batchFonts;
-    });
-}
-
-const fetchAds = () => {
-  return new Promise (r => setTimeout(r, 500))
-    .then(() => axios.get('ads.json'))
-    .then(res => {return res.data});
-}
-
-const formatDate = date => {
-  const properDate = moment(date)
-  const relativeDate = properDate.fromNow();
-  const splitRelDate = relativeDate.split(' ');
-  const unit = splitRelDate[0]
-  const period = splitRelDate[1];
-  const correctionFilter = ['month', 'months', 'year', 'years'];
-  let formattedDate;
-  if(correctionFilter.includes(period) || (period === 'days' && parseInt(unit) > 6)) {
-    formattedDate = properDate.format('ll');
-  } else {
-    formattedDate = relativeDate;
-  }
-  return formattedDate.toString();
-}
 
 const App = () => {
   const [page, setPage] = useState(1);
@@ -79,11 +30,28 @@ const App = () => {
     setPage(1);
     setInitial(true);
     setNextBatch([]);
+    setOffset(0);
     setItemsDisplayed([]);
     setLoading(true);
     setHasMore(true);
     setSortBy(sortByRef.current.value);
     setOrder(orderRef.current.value);
+  }
+
+  const formatDate = date => {
+    const properDate = moment(date)
+    const relativeDate = properDate.fromNow();
+    const splitRelDate = relativeDate.split(' ');
+    const unit = splitRelDate[0]
+    const period = splitRelDate[1];
+    const correctionFilter = ['month', 'months', 'year', 'years'];
+    let formattedDate;
+    if(correctionFilter.includes(period) || (period === 'days' && parseInt(unit) > 6)) {
+      formattedDate = properDate.format('ll');
+    } else {
+      formattedDate = relativeDate;
+    }
+    return formattedDate.toString();
   }
 
   const addType = (type) => {
@@ -93,10 +61,6 @@ const App = () => {
       return newItem;
     }
     return modItem;
-  }
-
-  const getRandom = (fetchedAds) => {
-    return fetchedAds[Math.floor(Math.random() * fetchedAds.length)];
   }
 
   useEffect(() => {
@@ -116,6 +80,10 @@ const App = () => {
   }, [initial])
 
   useEffect(() => {
+    const getRandom = (fetchedAds) => {
+      return fetchedAds[Math.floor(Math.random() * fetchedAds.length)];
+    }
+
     const loadFonts = async () => {
       if(!initial && hasMore) {
         setLoading(true);
